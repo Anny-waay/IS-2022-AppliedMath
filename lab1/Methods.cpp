@@ -142,8 +142,6 @@ void ParabolasMethod(double (*f)(double), double a, double b, double eps)
     fa = f(a);
     fb = f(b);
     fx = f(x);
-    vector<double> segments;
-    double seg = b - a;
     while (b - a > eps)
     {
         u = x - ((x - a) * (x - a) * (fx - fb) - (x - b) * (x - b) * (fx - fa)) / (2 * ((x - a) * (fx - fb) - (x - b) * (fx - fa)));
@@ -177,20 +175,12 @@ void ParabolasMethod(double (*f)(double), double a, double b, double eps)
             fx = fu;
         }
         ++iterCounter;
-        segments.push_back(seg / (b - a));
-        seg = b - a;
     }
     cout << "Parabolas Method" << endl;
     cout << "Min f(x) = " << f(u) << endl;
     cout << "Min x = " << u << endl;
     cout << "Number of iterations = " << iterCounter << endl;
-    cout << "Number of function evaluations = " << iterCounter+3 << endl;
-    cout << "The segment decreases at iterations:" << endl;
-    for (int i = 0; i < segments.size(); i++)
-    {
-        cout << segments[i] << " ";
-    }
-    cout << endl << endl;
+    cout << "Number of function evaluations = " << iterCounter+3 << endl << endl;
 }
 
 template <class Value>
@@ -214,8 +204,6 @@ void BrentMethod(double (*f)(double), double a, double c, double eps)
     fv = f(v);
     d = c - a;
     e = c - a;
-    vector<double> segments;
-    double seg = c - a;
     while (d > eps)
     {
         g = e;
@@ -303,18 +291,10 @@ void BrentMethod(double (*f)(double), double a, double c, double eps)
             }
         }
         ++iterCounter;
-        segments.push_back(seg / (c - a));
-        seg = c - a;
     }
     cout << "Brent Method" << endl;
     cout << "Min f(x) = " << f(x) << endl;
     cout << "Min x = " << x << endl;
     cout << "Number of iterations = " << iterCounter << endl;
-    cout << "Number of function evaluations = " << iterCounter + 3 << endl;
-    cout << "The segment decreases at iterations:" << endl;
-    for (int i = 0; i < segments.size(); i++)
-    {
-        cout << segments[i] << " ";
-    }
-    cout << endl << endl;
+    cout << "Number of function evaluations = " << iterCounter + 3 << endl << endl;
 }
