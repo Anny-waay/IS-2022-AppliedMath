@@ -185,8 +185,8 @@ void ParabolasMethod(double (*f)(double), double a, double b, double eps)
 
 template <class Value>
 int Sign(Value Val) {
-    if (Val == 0.)  return 0;
-    if (Val > 0.)  return 1;
+    if (Val == 0)  return 0;
+    if (Val > 0)  return 1;
     else return -1;
 }
 
