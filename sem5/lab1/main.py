@@ -1,5 +1,19 @@
 import numpy as np
 
+def add_variables(simplex_table, signs):
+    for i in range(1, len(signs)):
+        if signs[i] != "=":
+            edit = np.zeros((len(simplex_table), 1))
+            simplex_table = np.append(simplex_table, edit, axis=1)
+            if "<" in signs[i]:
+                simplex_table[i][-1] = 1
+            if ">" in signs[i]:
+                simplex_table[i] *= -1
+                simplex_table[i][-1] = 1
+            if np.all(simplex_table[:, -1] == edit):
+                print("Некорректный знак в строке", i+1)
+    return simplex_table
+
 def check_negative(b):
     for i in range(len(b)):
         if b[i] < 0:
@@ -56,7 +70,9 @@ def change_basis(simplex_table, i_base, j_base):
             r = simplex_table[i][j_base]
             simplex_table[i] -= r * simplex_table[i_base]
 
-def make_basis(simplex_table, delta):
+def make_basis(simplex_table, signs):
+    simplex_table = add_variables(simplex_table, signs)
+    delta = np.zeros(simplex_table[0].shape)
     basis_j, basis_i = find_basis(simplex_table)
 
     if len(basis_j) != len(simplex_table) - 1:
@@ -86,6 +102,7 @@ def make_basis(simplex_table, delta):
     replace_neg_zero(simplex_table)
     change_delta(simplex_table, delta, basis_j, basis_i)
     my_round(simplex_table, delta)
+    return simplex_table, delta
 
 def pivot(simplex_table, delta):
     l = list(delta)
@@ -106,31 +123,36 @@ def pivot(simplex_table, delta):
     change_delta(simplex_table, delta, basis_j, basis_i)
     return True
 
-def display_answer(simplex_table, delta):
+def display_answer(simplex_table, delta, x_num):
     answers = np.zeros(len(simplex_table[0]) - 1)
     basis_j, basis_i = find_basis(simplex_table)
     for z in range(len(basis_j)):
         answers[basis_j[z] - 1] = simplex_table[basis_i[z]][0]
     for i in range(len(answers)):
+        if i == x_num:
+            print("Дополнительные переменные")
         print("x", i + 1, "=", answers[i])
-    print("f =", delta[0])
+    print("\nf =", delta[0])
 
-def solve(simplex_table):
-    delta = np.zeros(simplex_table[0].shape)
-    make_basis(simplex_table, delta)
+def solve(simplex_table, signs):
+    x_num = len(simplex_table[0]) -1
+    simplex_table, delta = make_basis(simplex_table, signs)
     flag = True
     while flag:
         if max(delta[1:]) <= 0:
             flag = False
             my_round(simplex_table, delta)
-            display_answer(simplex_table, delta)
+            display_answer(simplex_table, delta, x_num)
         else:
             flag = pivot(simplex_table, delta)
             if not flag:
                 print("Область не ограничена")
 
 for i in range(1, 8):
+    print("Test", i)
     test_path = "tests/test" + str(i) + ".txt"
-    simplex_table = np.loadtxt(test_path, dtype=float)
-    solve(simplex_table)
+    data = np.loadtxt(test_path, dtype=str)
+    simplex_table = data[:, :-1].astype("float")
+    signs = list(data[:, -1])
+    solve(simplex_table, signs)
     print()
