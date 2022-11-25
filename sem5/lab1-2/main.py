@@ -8,17 +8,21 @@ def add_variables(simplex_table, signs):
             if "<" in signs[i]:
                 simplex_table[i][-1] = 1
             if ">" in signs[i]:
-                simplex_table[i] *= -1
-                simplex_table[i][-1] = 1
+                # simplex_table[i] *= -1
+                simplex_table[i][-1] = -1
             if np.all(simplex_table[:, -1] == edit):
                 print("Некорректный знак в строке", i+1)
+    replace_neg_zero(simplex_table)
     return simplex_table
 
 def check_negative(b):
+    min_b = 0
+    index = -1
     for i in range(len(b)):
-        if b[i] < 0:
-            return i + 1
-    return -1
+        if b[i] < 0 and b[i] < min_b:
+            min_b = b[i]
+            index = i + 1
+    return index
 
 def find_max_el_ind(b, escape_ind):
     max = 0
@@ -74,7 +78,6 @@ def make_basis(simplex_table, signs):
     simplex_table = add_variables(simplex_table, signs)
     delta = np.zeros(simplex_table[0].shape)
     basis_j, basis_i = find_basis(simplex_table)
-
     if len(basis_j) != len(simplex_table) - 1:
         for j in range(1, len(simplex_table[0])):
             if j not in basis_j:
@@ -92,6 +95,9 @@ def make_basis(simplex_table, signs):
     i_neg_b = check_negative(simplex_table[1:, 0])
     while i_neg_b != -1:
         prev_base = basis_i.index(i_neg_b)
+        if check_negative(simplex_table[i_neg_b, 1:]) == -1:
+            print("Решение задачи не существует")
+            return -1
         l= list(np.abs(simplex_table[i_neg_b, 1:]))
         j_ind = find_max_el_ind(l, basis_j[prev_base]-1)
         change_basis(simplex_table, i_neg_b, j_ind)
@@ -104,9 +110,12 @@ def make_basis(simplex_table, signs):
     my_round(simplex_table, delta)
     return simplex_table, delta
 
-def pivot(simplex_table, delta):
+def pivot(simplex_table, delta, min_max):
     l = list(delta)
-    j_base = l.index(max(l))
+    if min_max == "min":
+        j_base = l.index(max(l))
+    else:
+        j_base = l.index(min(l))
     i_base = -1
     for i in range(1, len(simplex_table)):
         if simplex_table[i][j_base] > 0:
@@ -128,31 +137,56 @@ def display_answer(simplex_table, delta, x_num):
     basis_j, basis_i = find_basis(simplex_table)
     for z in range(len(basis_j)):
         answers[basis_j[z] - 1] = simplex_table[basis_i[z]][0]
+
+    print("f =", delta[0], "\n")
     for i in range(len(answers)):
         if i == x_num:
-            print("Дополнительные переменные")
+            print("\nДополнительные переменные")
         print("x", i + 1, "=", answers[i])
-    print("\nf =", delta[0])
 
-def solve(simplex_table, signs):
-    x_num = len(simplex_table[0]) -1
+def solve(simplex_table, signs, min_max):
+    x_num = len(simplex_table[0]) - 1
+    if make_basis(simplex_table, signs) == -1:
+        return
     simplex_table, delta = make_basis(simplex_table, signs)
     flag = True
     while flag:
-        if max(delta[1:]) <= 0:
-            flag = False
-            my_round(simplex_table, delta)
-            display_answer(simplex_table, delta, x_num)
+        if min_max == "min":
+            if max(delta[1:]) <= 0:
+                flag = False
+                my_round(simplex_table, delta)
+                display_answer(simplex_table, delta, x_num)
+            else:
+                flag = pivot(simplex_table, delta, min_max)
+                if not flag:
+                    print("Область не ограничена")
+        elif min_max == "max":
+            if min(delta[1:]) >= 0:
+                flag = False
+                my_round(simplex_table, delta)
+                display_answer(simplex_table, delta, x_num)
+            else:
+                flag = pivot(simplex_table, delta, min_max)
+                if not flag:
+                    print("Область не ограничена")
         else:
-            flag = pivot(simplex_table, delta)
-            if not flag:
-                print("Область не ограничена")
+            flag = False
+            print("Введите min или max")
 
-for i in range(1, 8):
-    print("Test", i)
-    test_path = "tests/test" + str(i) + ".txt"
-    data = np.loadtxt(test_path, dtype=str)
-    simplex_table = data[:, :-1].astype("float")
-    signs = list(data[:, -1])
-    solve(simplex_table, signs)
-    print()
+
+# lab1
+# for i in range(1, 8):
+#     print("Test", i)
+#     test_path = "tests-lab1/test" + str(i) + ".txt"
+#     data = np.loadtxt(test_path, dtype=str)
+#     simplex_table = data[:, :-1].astype("float")
+#     signs = list(data[:, -1])
+#     min_max = data[0, -1]
+#     solve(simplex_table, signs, min_max)
+#     print()
+
+data = np.loadtxt("tasks-lab2/task8_2.txt", dtype=str)
+simplex_table = data[:, :-1].astype("float")
+signs = list(data[:, -1])
+min_max = data[0, -1]
+solve(simplex_table, signs, min_max)
