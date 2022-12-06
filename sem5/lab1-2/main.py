@@ -185,7 +185,7 @@ def solve(simplex_table, signs, min_max):
 #     solve(simplex_table, signs, min_max)
 #     print()
 
-data = np.loadtxt("tasks-lab2/task8_2.txt", dtype=str)
+data = np.loadtxt("data.txt", dtype=str)
 simplex_table = data[:, :-1].astype("float")
 signs = list(data[:, -1])
 min_max = data[0, -1]
