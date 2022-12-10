@@ -2,14 +2,14 @@ import numpy as np
 from numpy.linalg import norm
 import matplotlib.pyplot as plt
 
-def generate_norm_graph(q):
+def generate_norm_graph(q, num):
     data = [norm(q[i] - q[i + 1]) for i in range(len(q) - 1)]
-    plt.title("График изменения среднеквадратического отклонения")
+    plt.title(f"График изменения среднеквадратического отклонения {num}")
     plt.plot(data)
     plt.show()
 
 
-def numerical_solve(p, q0, eps, max_it_count):
+def numerical_solve(p, q0, eps, max_it_count, num=""):
     print(f"Численное моделирование с начальным вектором {q0}")
     it_count = 0
     q = [q0]
@@ -24,7 +24,7 @@ def numerical_solve(p, q0, eps, max_it_count):
     if norm(q[-1] - q[-2]) > eps:
         print(f"Невозможно достичь точности {eps} за {max_it_count} итераций")
 
-    generate_norm_graph(q)
+    generate_norm_graph(q, num)
 
     print("Ответ")
     print(q0)
@@ -58,9 +58,9 @@ p = np.matrix([
 )
 
 q0 = np.matrix([[1, 0, 0, 0, 0, 0, 0, 0]])
-numerical_solve(p, q0, 0.001, 10000)
+numerical_solve(p, q0, 0.001, 10000, 1)
 
 q0 = np.matrix([[0, 0, 1, 0, 0, 0, 0, 0]])
-numerical_solve(p, q0, 0.001, 10000)
+numerical_solve(p, q0, 0.001, 10000, 2)
 
 analitical_solve(p)
