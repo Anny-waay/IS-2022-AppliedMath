@@ -93,7 +93,7 @@ def report(kernel, n, nu, with_graphic):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=0.7, stratify=y)
 
-    nuSVC = NuSVC(nu=nu, kernel=kernel)
+    nuSVC = NuSVC(nu=nu, kernel=kernel, degree=2)
     nuSVC.fit(X_train, y_train)
     y_pred = nuSVC.predict(X_test)
 
@@ -121,7 +121,7 @@ def choose_train_data_volume():
 def choose_nu():
     print("Nu choice\n")
     for nu in [0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05, 0.01]:
-        report('rbf', 5000, nu, False)
+        report('rbf', 5000, nu, True)
 
 choose_kernel()
 choose_train_data_volume()
